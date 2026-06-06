@@ -5,7 +5,8 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader, random_split
 import matplotlib.pyplot as plt 
 
-# добавляем seed для исклбчения случайной инициализации
+# добавляем seed для исключения случайной инициализации
+# популярно ставить параметр 42
 def set_seed(seed=42):
     random.seed(seed)
     np.random.seed(seed)
@@ -13,6 +14,7 @@ def set_seed(seed=42):
 
 set_seed(42)
 
+# здесь идет обработка набора данных, состоящего из временных рядов
 class ECGDataset(Dataset):
     def __init__(self, path):
         data = np.loadtxt(path, delimiter="\t")
@@ -36,7 +38,7 @@ test_dataset  = ECGDataset("ECG5000_TEST.tsv")
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 test_loader  = DataLoader(test_dataset, batch_size=128, shuffle=False)
 
-
+# здесь описываем классическую модель рекурентной нейронной сети
 class RNN(nn.Module):
     def __init__(self, input_size=1, hidden_size=128, num_layers=3):
         super().__init__()
@@ -58,7 +60,7 @@ class RNN(nn.Module):
         last = out[:, -1, :]  # выход последнего временного шага       
         return self.fc(last)
 
-
+# здесь описываем модель LSTM
 class LSTM(nn.Module):
     def __init__(self, input_size=1, hidden_size=128, num_layers=3):
         super().__init__()
@@ -77,7 +79,7 @@ class LSTM(nn.Module):
         last = out[:, -1, :]   # берём выход последнего шага
         return self.fc(last)   # предсказание класса
     
-    
+# обучаем модель  
 def train_epoch(model, loader, opt, loss_fn, device):
     model.train()
     correct, total = 0, 0
@@ -94,7 +96,7 @@ def train_epoch(model, loader, opt, loss_fn, device):
         total += y.size(0)
 
     return 100 * correct / total
-
+# прогоняем на тренировочном наборе данных
 def test_epoch(model, loader, device):
     model.eval()
     correct, total = 0, 0
